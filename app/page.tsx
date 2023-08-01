@@ -18,7 +18,6 @@ export default function Home() {
     const handleRestart = () => {
         setActiveTranscribe(undefined);
     };
-    console.log(activeTranscribe);
     const getTabConent = () => {
         switch (activeTab) {
             case 0:

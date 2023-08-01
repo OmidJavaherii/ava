@@ -7,11 +7,9 @@ import {AiOutlineFileWord} from 'react-icons/ai';
 import localFont from 'next/font/local';
 import {useEffect, useState} from 'react';
 import PageNav from '../components/PageNav';
-import {log} from 'console';
 import React from 'react';
 import Transcribe from '../components/Transcribe';
 
-const yekanFontLight = localFont({src: '../font/iranYekanLight.ttf'});
 const iranSansFont = localFont({src: '../font/iranSans.ttf'});
 
 enum inputType {
@@ -159,7 +157,6 @@ const Archive = () => {
     };
 
     const handlePageChange = (val: number) => {
-        console.log(val);
         setPage(val);
     };
 
@@ -169,36 +166,41 @@ const Archive = () => {
                 <div className="flex w-full justify-end pr-4 text-3xl text-ava-green">
                     آرشیو من
                 </div>
-                <div className="mt-4 flex w-full flex-col">
+                <div className="mt-4 flex w-full flex-col pr-4">
                     <div className="text-right">
-                        <div className="ml-4 mr-1 flex flex-row-reverse text-lg">
-                            <span className="flex w-[54%] justify-end pb-6 pr-24">
+                        <div className="mr-1 flex flex-row-reverse px-4 text-lg">
+                            <span className="w-12 pr-4" />
+                            <span className="flex-1 grow-[5] justify-end pr-8">
                                 نام فایل
                             </span>
-                            <span className="w-[14%] pb-6 text-center">
+                            <span className="flex-1 text-center">
                                 تاریخ بارگذاری
                             </span>
-                            <span className="w-[10%] pb-6 text-center">
-                                نوع فایل
-                            </span>
-                            <span className="w-[10%] pb-6 text-center">
-                                مدت زمان
-                            </span>
+                            <span className="flex-1 text-center">نوع فایل</span>
+                            <span className="flex-1 text-center">مدت زمان</span>
+                            <span className="flex-1 grow-[2]" />
                         </div>
-                        <div className="rtl max-h-[560px] overflow-y-auto pl-4">
+                        <div className="rtl hs mt-6 max-h-[560px] overflow-y-auto pl-4">
                             {exampleData
                                 .slice(page * 8 - 8, page * 8)
                                 .map((row, k) => (
                                     <div
                                         className={`${
-                                            expandedRow === k &&
-                                            'rounded-lg border border-solid border-ava-red'
-                                        } flex flex-col hover:shadow-[1px_2px_5px_0_rgba(0,0,0,0.1)]`}
-                                        onClick={() => setExpandedRow(k)}
+                                            expandedRow === k
+                                                ? 'border-solid border-ava-red'
+                                                : 'border-transparent hover:shadow-[1px_2px_5px_0_rgba(0,0,0,0.1)]'
+                                        } my-2 mr-1 flex flex-col rounded-lg border py-2 pr-4`}
                                         key={k}
                                     >
-                                        <div className="my-2 mr-1 flex flex-row items-center rounded-lg py-2 pr-4">
-                                            <div className="w-[5%] min-w-fit">
+                                        <div
+                                            className="flex flex-row items-center"
+                                            onClick={() =>
+                                                expandedRow === k
+                                                    ? setExpandedRow(undefined)
+                                                    : setExpandedRow(k)
+                                            }
+                                        >
+                                            <div className="pl-4">
                                                 {row.type ===
                                                     inputType.link && (
                                                     <div className="flex h-8 w-8 items-center justify-center rounded-full bg-ava-red text-2xl text-white">
@@ -218,7 +220,7 @@ const Archive = () => {
                                                     </div>
                                                 )}
                                             </div>
-                                            <div className="w-[50%] overflow-hidden text-ellipsis whitespace-nowrap pr-2">
+                                            <div className="flex-1 grow-[5] overflow-hidden text-ellipsis whitespace-nowrap pr-8">
                                                 {row.type === inputType.link ? (
                                                     <Link
                                                         className="font-light text-[#118AD3] hover:underline"
@@ -231,19 +233,19 @@ const Archive = () => {
                                                 )}
                                             </div>
                                             <div
-                                                className={`${iranSansFont.className} w-[15%] text-center`}
+                                                className={`${iranSansFont.className} flex-1 text-center`}
                                             >
                                                 {row.uploadDate}
                                             </div>
-                                            <div className="ltr w-[10%] text-center">
+                                            <div className="ltr flex-1 text-center">
                                                 {row.fileType}
                                             </div>
                                             <div
-                                                className={`${iranSansFont.className} w-[10%] text-center`}
+                                                className={`${iranSansFont.className} flex-1 text-center`}
                                             >
                                                 {getTime(row.duration)}
                                             </div>
-                                            <div className="w-[13%]">
+                                            <div className="flex-1 grow-[2]">
                                                 <div className="flex flex-row items-center justify-center text-lg text-[#8F8F8F]">
                                                     <BsDownload className="mx-3 cursor-pointer hover:text-ava-green" />
                                                     <AiOutlineFileWord className="mx-3 cursor-pointer hover:text-ava-green" />
@@ -255,7 +257,7 @@ const Archive = () => {
                                             </div>
                                         </div>
                                         {expandedRow === k && (
-                                            <div className="ltr max-h-96 overflow-y-auto px-16">
+                                            <div className="ltr h-80 overflow-hidden px-14">
                                                 <Transcribe
                                                     reButon={false}
                                                     color="red"

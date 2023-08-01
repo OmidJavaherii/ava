@@ -10,7 +10,7 @@ const Slider = (props: {
     max: number;
     value: number;
     loaded: number;
-    media: boolean;
+    thin: boolean;
     color: string;
     onChange: Function;
 }) => {
@@ -36,17 +36,17 @@ const Slider = (props: {
                     value={props.value}
                     onChange={e => handleChange(parseInt(e.target.value))}
                     className={`slider slider_${props.color} ${
-                        props.media ? '' : 'slider_invisible_thumb'
+                        props.thin ? '' : 'slider_invisible_thumb'
                     }`}
                 />
                 <div
                     className={`${
-                        props.media ? 'h-[1px]' : 'h-[2px]'
+                        props.thin ? 'h-[1px]' : 'h-[2px]'
                     } absolute left-0 right-0 z-[1] rounded-lg bg-[#C6C6C6]`}
                 />
                 <div
                     className={`${'bg-ava-' + props.color} ${
-                        props.media ? 'h-[3px]' : 'h-[2px]'
+                        props.thin ? 'h-[3px]' : 'h-[2px]'
                     } absolute left-0 z-[2] rounded-lg`}
                     style={{
                         width: `${
@@ -72,7 +72,7 @@ const Slider = (props: {
                     }}
                 />
             </div>
-            {props.media && (
+            {props.thin && (
                 <div
                     className={`${iranSansFont.className} flex w-12 justify-center`}
                 >

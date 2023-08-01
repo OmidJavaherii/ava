@@ -8,7 +8,6 @@ import {AiOutlinePause} from 'react-icons/ai';
 import {BiSolidVolumeFull, BiSolidVolumeMute} from 'react-icons/bi';
 import {useEffect, useRef, useState} from 'react';
 import Slider from './Slider';
-import {motion} from 'framer-motion';
 
 const yekanFontLight = localFont({src: '../font/iranYekanLight.ttf'});
 const iranSansFont = localFont({src: '../font/iranSans.ttf'});
@@ -37,6 +36,7 @@ const Transcribe = (props: {
     const [isMute, setIsMute] = useState<boolean>(false);
     const [isPaused, setIsPaused] = useState<boolean>(true);
     const timedItems = useRef(new Array());
+    const timedDiv = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
         const audioInterval = setInterval(() => {
@@ -53,13 +53,20 @@ const Transcribe = (props: {
 
     useEffect(() => {
         if (activeTab === 0) return;
+
         const itemIndex = sampleTimedText.findIndex(
             item => audioPosition >= item.start && audioPosition <= item.stop,
         );
         if (itemIndex < 0) return;
-        timedItems.current[itemIndex].scrollIntoView({
+
+        if (!timedDiv.current) return;
+        const offset =
+            timedItems.current[itemIndex].offsetTop -
+            timedDiv.current.offsetTop;
+
+        timedDiv.current.scrollTo({
             behavior: 'smooth',
-            block: 'start',
+            top: offset,
         });
     }, [audioPosition]);
 
@@ -84,7 +91,7 @@ const Transcribe = (props: {
             // animate={{opacity: 1, scale: 1}}
             // exit={{opacity: 0}}
         >
-            <div className="flex w-full flex-row-reverse items-center p-2 text-ava-grey">
+            <div className="flex min-h-[48px] w-full flex-row-reverse items-center px-2 text-ava-grey">
                 <div className="flex flex-row-reverse">
                     <span
                         className={`${
@@ -95,7 +102,7 @@ const Transcribe = (props: {
                         <BsTextRight className="text-lg" />
                         متن ساده
                         {activeTab === 0 && (
-                            <hr className="absolute -bottom-[31px] left-2 mt-1 h-[2px] w-full bg-neutral-500" />
+                            <hr className="absolute -bottom-[27px] left-2 mt-1 h-[2px] w-full bg-neutral-500" />
                         )}
                     </span>
                     <span
@@ -107,7 +114,7 @@ const Transcribe = (props: {
                         <BsClock className="text-lg" />
                         متن زمان‌بندی شده
                         {activeTab === 1 && (
-                            <hr className="absolute -bottom-[31px] mt-1 h-[2px] w-full bg-neutral-500" />
+                            <hr className="absolute -bottom-[27px] mt-1 h-[2px] w-full bg-neutral-500" />
                         )}
                     </span>
                 </div>
@@ -138,12 +145,15 @@ const Transcribe = (props: {
             <hr className="mt-1 h-px w-full bg-black" />
             {activeTab === 0 ? (
                 <div className="rtl mt-2 flex flex-col items-center gap-3 overflow-y-auto text-right">
-                    <div className=" pl-4 text-right leading-7">
+                    <div className="pl-4 text-right leading-7">
                         {sampleText}
                     </div>
                 </div>
             ) : (
-                <div className="rtl mt-2 flex w-full flex-col overflow-y-auto pl-2">
+                <div
+                    className="rtl mt-2 flex w-full flex-col overflow-y-auto pl-2"
+                    ref={timedDiv}
+                >
                     {sampleTimedText.map((text, k) => (
                         <div
                             key={k}
@@ -192,7 +202,7 @@ const Transcribe = (props: {
                     value={audioPosition}
                     loaded={70}
                     color={props.color}
-                    media={true}
+                    thin={true}
                     onChange={handlePosition}
                 />
                 <div className="flex w-40 flex-row items-center justify-center gap-2 text-2xl">
@@ -211,7 +221,7 @@ const Transcribe = (props: {
                         min={0}
                         value={audioVolume}
                         loaded={0}
-                        media={false}
+                        thin={false}
                         onChange={handleVolume}
                     />
                 </div>

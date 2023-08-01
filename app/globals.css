@@ -20,6 +20,7 @@ body {
     color: rgb(var(--foreground-rgb));
     background: #fefefe;
     user-select: none;
+    scrollbar-gutter: stable;
 }
 
 .rtl {
@@ -88,4 +89,8 @@ body {
 
 ::-webkit-scrollbar-thumb:hover {
     @apply bg-[#aeaeae];
+}
+
+.hs::-webkit-scrollbar {
+    display: none;
 }
