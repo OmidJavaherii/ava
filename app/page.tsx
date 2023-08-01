@@ -1,113 +1,196 @@
-import Image from 'next/image'
+'use client';
+import {BsMic, BsLink45Deg} from 'react-icons/bs';
+import {FiUploadCloud} from 'react-icons/fi';
+import {useState} from 'react';
+import localFont from 'next/font/local';
+import LanguageSelect from './components/LanguageSelect';
+import Transcribe from './components/Transcribe';
+import {motion} from 'framer-motion';
+
+const yekanFontLight = localFont({src: './font/iranYekanLight.ttf'});
 
 export default function Home() {
-  return (
-    <main className="flex min-h-screen flex-col items-center justify-between p-24">
-      <div className="z-10 w-full max-w-5xl items-center justify-between font-mono text-sm lg:flex">
-        <p className="fixed left-0 top-0 flex w-full justify-center border-b border-gray-300 bg-gradient-to-b from-zinc-200 pb-6 pt-8 backdrop-blur-2xl dark:border-neutral-800 dark:bg-zinc-800/30 dark:from-inherit lg:static lg:w-auto  lg:rounded-xl lg:border lg:bg-gray-200 lg:p-4 lg:dark:bg-zinc-800/30">
-          Get started by editing&nbsp;
-          <code className="font-mono font-bold">app/page.tsx</code>
-        </p>
-        <div className="fixed bottom-0 left-0 flex h-48 w-full items-end justify-center bg-gradient-to-t from-white via-white dark:from-black dark:via-black lg:static lg:h-auto lg:w-auto lg:bg-none">
-          <a
-            className="pointer-events-none flex place-items-center gap-2 p-8 lg:pointer-events-auto lg:p-0"
-            href="https://vercel.com?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            By{' '}
-            <Image
-              src="/vercel.svg"
-              alt="Vercel Logo"
-              className="dark:invert"
-              width={100}
-              height={24}
-              priority
-            />
-          </a>
-        </div>
-      </div>
+    const [activeTab, setActiveTab] = useState<Number>(0);
+    const [activeTranscribe, setActiveTranscribe] = useState<
+        Number | undefined
+    >();
 
-      <div className="relative flex place-items-center before:absolute before:h-[300px] before:w-[480px] before:-translate-x-1/2 before:rounded-full before:bg-gradient-radial before:from-white before:to-transparent before:blur-2xl before:content-[''] after:absolute after:-z-20 after:h-[180px] after:w-[240px] after:translate-x-1/3 after:bg-gradient-conic after:from-sky-200 after:via-blue-200 after:blur-2xl after:content-[''] before:dark:bg-gradient-to-br before:dark:from-transparent before:dark:to-blue-700 before:dark:opacity-10 after:dark:from-sky-900 after:dark:via-[#0141ff] after:dark:opacity-40 before:lg:h-[360px] z-[-1]">
-        <Image
-          className="relative dark:drop-shadow-[0_0_0.3rem_#ffffff70] dark:invert"
-          src="/next.svg"
-          alt="Next.js Logo"
-          width={180}
-          height={37}
-          priority
-        />
-      </div>
+    const handleRestart = () => {
+        setActiveTranscribe(undefined);
+    };
+    console.log(activeTranscribe);
+    const getTabConent = () => {
+        switch (activeTab) {
+            case 0:
+                if (activeTranscribe === 0)
+                    return (
+                        <Transcribe
+                            reButon={true}
+                            color="green"
+                            onRestart={handleRestart}
+                        />
+                    );
+                return (
+                    <motion.div
+                        key={1}
+                        className="flex h-full w-full flex-col items-center justify-center"
+                        initial={{opacity: 0, scale: 0.5}}
+                        animate={{opacity: 1, scale: 1}}
+                        exit={{opacity: 0}}
+                    >
+                        <span
+                            className="flex h-16 w-16 cursor-pointer items-center justify-center rounded-full bg-ava-green text-3xl text-white"
+                            onClick={() => setActiveTranscribe(0)}
+                        >
+                            <BsMic />
+                        </span>
+                        <div className={`${yekanFontLight.className} mt-4`}>
+                            برای شروع به صحبت، دکمه را فشار دهید
+                            <br />
+                            متن پیاده شده آن، در اینجا ظاهر می‌شود
+                        </div>
+                    </motion.div>
+                );
+            case 1:
+                if (activeTranscribe === 1)
+                    return (
+                        <Transcribe
+                            reButon={true}
+                            color="blue"
+                            onRestart={handleRestart}
+                        />
+                    );
+                return (
+                    <motion.div
+                        key={2}
+                        className="flex h-full w-full flex-col items-center justify-center"
+                        initial={{opacity: 0, scale: 0.5}}
+                        animate={{opacity: 1, scale: 1}}
+                        exit={{opacity: 0}}
+                    >
+                        <span
+                            className="flex h-16 w-16 cursor-pointer items-center justify-center rounded-full bg-ava-blue text-3xl text-white"
+                            onClick={() => setActiveTranscribe(1)}
+                        >
+                            <FiUploadCloud />
+                        </span>
+                        <div
+                            className={`${yekanFontLight.className} mt-4 flex flex-col items-center`}
+                        >
+                            <span>
+                                برای بارگذاری فایل گفتاری (صوتی/تصویری)، دکمه را
+                                فشار دهید
+                            </span>
+                            <span>متن پیاده شده آن، در اینجا ظاهر می شود</span>
+                        </div>
+                    </motion.div>
+                );
+            case 2:
+                if (activeTranscribe === 2)
+                    return (
+                        <Transcribe
+                            reButon={true}
+                            color="red"
+                            onRestart={handleRestart}
+                        />
+                    );
+                return (
+                    <motion.div
+                        key={3}
+                        className="flex h-full w-full flex-col items-center justify-center"
+                        initial={{opacity: 0, scale: 0.5}}
+                        animate={{opacity: 1, scale: 1}}
+                        exit={{opacity: 0}}
+                    >
+                        <div className="flex h-12 w-[328px] flex-row items-center gap-3 rounded-3xl border border-ava-red p-4">
+                            <span className="rounded-full bg-ava-red p-1 text-lg text-white">
+                                <BsLink45Deg />
+                            </span>
+                            <input
+                                type="text"
+                                placeholder="example.com/samlple.mp3"
+                                className={`${yekanFontLight.className} w-full text-ava-grey outline-none`}
+                            ></input>
+                        </div>
+                        <div
+                            className={`${yekanFontLight.className} mt-4 flex flex-col items-center`}
+                        >
+                            <span>
+                                نشانی اینترنتی فایل حاوی گفتار (صوتی/تصویری) را
+                                وارد
+                            </span>
+                            <span>و دکمه را فشار دهید</span>
+                        </div>
+                    </motion.div>
+                );
+            default:
+                return <></>;
+        }
+    };
 
-      <div className="mb-32 grid text-center lg:mb-0 lg:grid-cols-4 lg:text-left">
-        <a
-          href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Docs{' '}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Find in-depth information about Next.js features and API.
-          </p>
-        </a>
-
-        <a
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Learn{' '}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Learn about Next.js in an interactive course with&nbsp;quizzes!
-          </p>
-        </a>
-
-        <a
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Templates{' '}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Explore the Next.js 13 playground.
-          </p>
-        </a>
-
-        <a
-          href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Deploy{' '}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Instantly deploy your Next.js site to a shareable URL with Vercel.
-          </p>
-        </a>
-      </div>
-    </main>
-  )
+    return (
+        <main className="flex h-screen w-full flex-col items-center pr-48">
+            <div className="mt-24 flex w-full flex-col items-center justify-start">
+                <span className="text-3xl font-bold text-ava-green">
+                    تبدیل گفتار به متن
+                </span>
+                <span className="mt-4 font-thin text-ava-grey">
+                    ،آوا با استفاده از هزاران ساعت گفتار با صدای افراد مختلف
+                </span>
+                <span className="mt-1 font-thin text-ava-grey">
+                    .زبان فارسی را یاد گرفته است و می‌تواند متن صحبت‌ها را
+                    بنویسد
+                </span>
+            </div>
+            <div className="mt-12 flex flex-col">
+                <div
+                    className={`${yekanFontLight.className} flex flex-row-reverse`}
+                >
+                    <span
+                        className={`${
+                            activeTab == 0 && 'bg-ava-green text-white'
+                        } flex cursor-pointer flex-row items-center gap-1 rounded-t-lg px-8 py-3 text-ava-grey`}
+                        onClick={() => setActiveTab(0)}
+                    >
+                        ظبط صدا
+                        <BsMic className="text-2xl" />
+                    </span>
+                    <span
+                        className={`${
+                            activeTab == 1 && 'bg-ava-blue text-white'
+                        } flex cursor-pointer flex-row items-center gap-2 rounded-t-lg px-4 py-3 text-ava-grey`}
+                        onClick={() => setActiveTab(1)}
+                    >
+                        بارگذاری فایل
+                        <FiUploadCloud className="text-2xl font-thin" />
+                    </span>
+                    <span
+                        className={`${
+                            activeTab == 2 && 'bg-ava-red text-white'
+                        } flex cursor-pointer flex-row items-center gap-1 rounded-t-lg px-4 py-3 text-ava-grey`}
+                        onClick={() => setActiveTab(2)}
+                    >
+                        لینک
+                        <BsLink45Deg className="text-2xl" />
+                    </span>
+                </div>
+                <div
+                    className={`${
+                        (activeTab == 0 &&
+                            'rounded-tr-none border-ava-green') ||
+                        (activeTab == 1 && 'border-ava-blue') ||
+                        (activeTab == 2 && 'border-ava-red')
+                    } h-[430px] w-[650px] rounded-xl border bg-white`}
+                >
+                    {getTabConent()}
+                </div>
+                <div className="mt-6">
+                    <span className="flex flex-row-reverse items-center justify-end gap-4 text-ava-grey">
+                        :زبان گفتار
+                        <LanguageSelect />
+                    </span>
+                </div>
+            </div>
+        </main>
+    );
 }
