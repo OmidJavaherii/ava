@@ -9,6 +9,7 @@ import {useEffect, useState} from 'react';
 import PageNav from '../components/PageNav';
 import React from 'react';
 import Transcribe from '../components/Transcribe';
+import {AnimatePresence, easeInOut, motion} from 'framer-motion';
 
 const iranSansFont = localFont({src: '../font/iranSans.ttf'});
 
@@ -192,15 +193,17 @@ const Archive = () => {
                                         } my-2 mr-1 flex flex-col rounded-lg border py-2 pr-4`}
                                         key={k}
                                     >
-                                        <div
-                                            className="flex flex-row items-center"
-                                            onClick={() =>
-                                                expandedRow === k
-                                                    ? setExpandedRow(undefined)
-                                                    : setExpandedRow(k)
-                                            }
-                                        >
-                                            <div className="pl-4">
+                                        <div className="flex flex-row items-center justify-center">
+                                            <div
+                                                className="cursor-pointer pl-4"
+                                                onClick={() =>
+                                                    expandedRow === k
+                                                        ? setExpandedRow(
+                                                              undefined,
+                                                          )
+                                                        : setExpandedRow(k)
+                                                }
+                                            >
                                                 {row.type ===
                                                     inputType.link && (
                                                     <div className="flex h-8 w-8 items-center justify-center rounded-full bg-ava-red text-2xl text-white">
@@ -256,15 +259,40 @@ const Archive = () => {
                                                 </div>
                                             </div>
                                         </div>
-                                        {expandedRow === k && (
-                                            <div className="ltr h-80 overflow-hidden px-14">
-                                                <Transcribe
-                                                    reButon={false}
-                                                    color="red"
-                                                    onRestart={() => null}
-                                                />
-                                            </div>
-                                        )}
+                                        <AnimatePresence>
+                                            {expandedRow === k && (
+                                                <motion.div
+                                                    className="ltr overflow-hidden px-14"
+                                                    initial={{
+                                                        height: 0,
+                                                        opacity: 0.5,
+                                                    }}
+                                                    animate={{
+                                                        height: '20rem',
+                                                        opacity: 1,
+                                                    }}
+                                                    exit={{
+                                                        height: 0,
+                                                        opacity: 0.5,
+                                                    }}
+                                                    transition={{duration: 0.3}}
+                                                >
+                                                    <Transcribe
+                                                        reButon={false}
+                                                        color={
+                                                            (row.type ===
+                                                                inputType.link &&
+                                                                'red') ||
+                                                            (row.type ===
+                                                                inputType.upload &&
+                                                                'blue') ||
+                                                            'green'
+                                                        }
+                                                        onRestart={() => null}
+                                                    />
+                                                </motion.div>
+                                            )}
+                                        </AnimatePresence>
                                     </div>
                                 ))}
                         </div>

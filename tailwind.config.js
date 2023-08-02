@@ -9,6 +9,9 @@ module.exports = {
     'hover:text-ava-red',
     'hover:text-ava-green',
     'hover:text-ava-blue',
+    'text-ava-red',
+    'text-ava-green',
+    'text-ava-blue',
   ],
   theme: {
     extend: {

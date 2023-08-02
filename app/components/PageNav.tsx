@@ -3,7 +3,6 @@
 import localFont from 'next/font/local';
 import {useEffect, useState} from 'react';
 
-const yekanFontLight = localFont({src: '../font/iranYekanLight.ttf'});
 const iranSansFont = localFont({src: '../font/iranSans.ttf'});
 
 const PageNav = (props: {
@@ -18,8 +17,8 @@ const PageNav = (props: {
     }, []);
 
     const getPages = () => {
-        const val = 100;
-        const pages = Math.floor(val / 8) + (val % 8 > 0 ? 1 : 0);
+        const pages =
+            Math.floor(props.items / 8) + (props.items % 8 > 0 ? 1 : 0);
         return Array.from({length: pages}, (_, index) => index + 1);
     };
     const getRange = (): Array<number> => {
@@ -37,7 +36,13 @@ const PageNav = (props: {
         <div
             className={`${iranSansFont.className} absolute bottom-6 left-0 right-0 ml-auto mr-auto flex flex-row-reverse items-center justify-center gap-2 pr-48 text-lg text-ava-green`}
         >
-            <span className="cursor flex h-8 w-8 cursor-pointer items-center justify-center rounded-full hover:bg-slate-200">
+            <span
+                className="cursor flex h-8 w-8 cursor-pointer items-center justify-center rounded-full hover:bg-slate-200"
+                onClick={() =>
+                    props.currentPage > 1 &&
+                    props.onChange(props.currentPage - 1)
+                }
+            >
                 {'>'}
             </span>
             <span
@@ -94,7 +99,13 @@ const PageNav = (props: {
                     {lastPage}
                 </span>
             )}
-            <span className="cursor flex h-8 w-8 cursor-pointer items-center justify-center rounded-full hover:bg-slate-200">
+            <span
+                className="cursor flex h-8 w-8 cursor-pointer items-center justify-center rounded-full hover:bg-slate-200"
+                onClick={() =>
+                    props.currentPage < lastPage &&
+                    props.onChange(props.currentPage + 1)
+                }
+            >
                 {'<'}
             </span>
         </div>

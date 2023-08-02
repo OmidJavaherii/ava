@@ -8,6 +8,8 @@ import {AiOutlinePause} from 'react-icons/ai';
 import {BiSolidVolumeFull, BiSolidVolumeMute} from 'react-icons/bi';
 import {useEffect, useRef, useState} from 'react';
 import Slider from './Slider';
+import {ToastContainer, toast} from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const yekanFontLight = localFont({src: '../font/iranYekanLight.ttf'});
 const iranSansFont = localFont({src: '../font/iranSans.ttf'});
@@ -84,13 +86,27 @@ const Transcribe = (props: {
         setAudioPosition(val);
     };
 
+    const copyToClipBoard = (clipboardText: string, toastText: string) => {
+        navigator.clipboard.writeText(clipboardText);
+        toast.success(toastText);
+    };
+
     return (
         <div
             className={`${yekanFontLight.className} flex h-full w-full flex-col items-center gap-2 px-6 py-4`}
-            // initial={{opacity: 0, scale: 0.9}}
-            // animate={{opacity: 1, scale: 1}}
-            // exit={{opacity: 0}}
         >
+            <ToastContainer
+                position="bottom-right"
+                autoClose={3000}
+                hideProgressBar={false}
+                newestOnTop={false}
+                closeOnClick
+                rtl
+                pauseOnFocusLoss
+                draggable
+                pauseOnHover
+                theme="light"
+            />
             <div className="flex min-h-[48px] w-full flex-row-reverse items-center px-2 text-ava-grey">
                 <div className="flex flex-row-reverse">
                     <span
@@ -128,6 +144,12 @@ const Transcribe = (props: {
                             />
                             <GoCopy
                                 className={`hover:text-ava-${props.color} cursor-pointer text-lg`}
+                                onClick={() =>
+                                    copyToClipBoard(
+                                        sampleText,
+                                        'به کلیپبورد افزوده شد',
+                                    )
+                                }
                             />
                         </span>
                         <button
@@ -159,8 +181,7 @@ const Transcribe = (props: {
                             key={k}
                             className={`${
                                 k % 2 == 0 ? 'bg-[#F2F2F2]' : 'bg-white'
-                            }
-                            ${
+                            } ${
                                 audioPosition >= text.start &&
                                 audioPosition <= text.stop &&
                                 `text-ava-${props.color}`
