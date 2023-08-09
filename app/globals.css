@@ -35,6 +35,17 @@ body {
     @apply z-[5] w-full cursor-pointer appearance-none rounded-xl rounded-s-md bg-transparent outline-none;
 }
 
+.slider::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 0;
+    transform: translateY(-50%);
+    height: 2px; /* Adjust the height of the track */
+    background-color: red;
+    width: 100%; /* Set the initial width of the track */
+}
+
 .slider::-webkit-slider-thumb {
     @apply z-50 h-3 w-3 cursor-pointer appearance-none rounded-full transition-all hover:scale-125;
 }
