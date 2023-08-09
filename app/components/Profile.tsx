@@ -1,17 +1,15 @@
-"use client";
+import {RiArrowDownSFill, RiArrowUpSFill} from 'react-icons/ri';
+import {FiUser} from 'react-icons/fi';
+import {PiSignOut} from 'react-icons/pi';
+import {useState} from 'react';
 
-import { RiArrowDownSFill, RiArrowUpSFill } from "react-icons/ri";
-import { FiUser } from "react-icons/fi";
-import { PiSignOut } from "react-icons/pi";
-import { useState } from "react";
-
-const Profile = (props: { name: String }) => {
+const Profile = (props: {name: String}) => {
     const [isOpen, setIsOpen] = useState(false);
 
     return (
         <div
             className="flex cursor-pointer flex-col items-end justify-center rounded-2xl border-2 border-solid border-ava-green text-ava-green"
-            onClick={() => setIsOpen((prev) => !prev)}
+            onClick={() => setIsOpen(prev => !prev)}
         >
             <span className="flex flex-row items-center justify-end gap-2 px-3 py-1 text-lg">
                 {isOpen ? <RiArrowUpSFill /> : <RiArrowDownSFill />}

@@ -1,11 +1,13 @@
 'use client';
-import {BsMic, BsLink45Deg} from 'react-icons/bs';
-import {FiUploadCloud} from 'react-icons/fi';
 import {useState} from 'react';
 import localFont from 'next/font/local';
 import LanguageSelect from './components/LanguageSelect';
 import Transcribe from './components/Transcribe';
-import {motion} from 'framer-motion';
+import AudioRecorder from './components/AudioRecorder';
+import UploadAudio from './components/UploadAudio';
+import {BsMic, BsLink45Deg} from 'react-icons/bs';
+import {FiUploadCloud} from 'react-icons/fi';
+import LinkAudio from './components/LinkAudio';
 
 const yekanFontLight = localFont({src: './font/iranYekanLight.ttf'});
 
@@ -14,10 +16,17 @@ export default function Home() {
     const [activeTranscribe, setActiveTranscribe] = useState<
         Number | undefined
     >();
+    const [activeAudio, setActiveAudio] = useState<string>('');
 
     const handleRestart = () => {
         setActiveTranscribe(undefined);
     };
+
+    const onAudioSubmit = (audioURL: string, tab: number) => {
+        setActiveAudio(audioURL);
+        setActiveTranscribe(tab);
+    };
+
     const getTabConent = () => {
         switch (activeTab) {
             case 0:
@@ -27,29 +36,10 @@ export default function Home() {
                             reButon={true}
                             color="green"
                             onRestart={handleRestart}
+                            audio={activeAudio}
                         />
                     );
-                return (
-                    <motion.div
-                        key={1}
-                        className="flex h-full w-full flex-col items-center justify-center"
-                        initial={{opacity: 0, scale: 0.5}}
-                        animate={{opacity: 1, scale: 1}}
-                        exit={{opacity: 0}}
-                    >
-                        <span
-                            className="flex h-16 w-16 cursor-pointer items-center justify-center rounded-full bg-ava-green text-3xl text-white"
-                            onClick={() => setActiveTranscribe(0)}
-                        >
-                            <BsMic />
-                        </span>
-                        <div className={`${yekanFontLight.className} mt-4`}>
-                            برای شروع به صحبت، دکمه را فشار دهید
-                            <br />
-                            متن پیاده شده آن، در اینجا ظاهر می‌شود
-                        </div>
-                    </motion.div>
-                );
+                return <AudioRecorder onSubmit={onAudioSubmit} />;
             case 1:
                 if (activeTranscribe === 1)
                     return (
@@ -57,33 +47,10 @@ export default function Home() {
                             reButon={true}
                             color="blue"
                             onRestart={handleRestart}
+                            audio={activeAudio}
                         />
                     );
-                return (
-                    <motion.div
-                        key={2}
-                        className="flex h-full w-full flex-col items-center justify-center"
-                        initial={{opacity: 0, scale: 0.5}}
-                        animate={{opacity: 1, scale: 1}}
-                        exit={{opacity: 0}}
-                    >
-                        <span
-                            className="flex h-16 w-16 cursor-pointer items-center justify-center rounded-full bg-ava-blue text-3xl text-white"
-                            onClick={() => setActiveTranscribe(1)}
-                        >
-                            <FiUploadCloud />
-                        </span>
-                        <div
-                            className={`${yekanFontLight.className} mt-4 flex flex-col items-center`}
-                        >
-                            <span>
-                                برای بارگذاری فایل گفتاری (صوتی/تصویری)، دکمه را
-                                فشار دهید
-                            </span>
-                            <span>متن پیاده شده آن، در اینجا ظاهر می شود</span>
-                        </div>
-                    </motion.div>
-                );
+                return <UploadAudio onSubmit={onAudioSubmit} />;
             case 2:
                 if (activeTranscribe === 2)
                     return (
@@ -91,37 +58,10 @@ export default function Home() {
                             reButon={true}
                             color="red"
                             onRestart={handleRestart}
+                            audio={activeAudio}
                         />
                     );
-                return (
-                    <motion.div
-                        key={3}
-                        className="flex h-full w-full flex-col items-center justify-center"
-                        initial={{opacity: 0, scale: 0.5}}
-                        animate={{opacity: 1, scale: 1}}
-                        exit={{opacity: 0}}
-                    >
-                        <div className="flex h-12 w-[328px] flex-row items-center gap-3 rounded-3xl border border-ava-red p-4">
-                            <span className="rounded-full bg-ava-red p-1 text-lg text-white">
-                                <BsLink45Deg />
-                            </span>
-                            <input
-                                type="text"
-                                placeholder="example.com/samlple.mp3"
-                                className={`${yekanFontLight.className} w-full text-ava-grey outline-none`}
-                            ></input>
-                        </div>
-                        <div
-                            className={`${yekanFontLight.className} mt-4 flex flex-col items-center`}
-                        >
-                            <span>
-                                نشانی اینترنتی فایل حاوی گفتار (صوتی/تصویری) را
-                                وارد
-                            </span>
-                            <span>و دکمه را فشار دهید</span>
-                        </div>
-                    </motion.div>
-                );
+                return <LinkAudio onSubmit={onAudioSubmit} />;
             default:
                 return <></>;
         }
@@ -179,7 +119,7 @@ export default function Home() {
                             'rounded-tr-none border-ava-green') ||
                         (activeTab == 1 && 'border-ava-blue') ||
                         (activeTab == 2 && 'border-ava-red')
-                    } h-[430px] w-[650px] rounded-xl border bg-white`}
+                    } h-[430px] w-[650px] overflow-hidden rounded-xl border bg-white`}
                 >
                     {getTabConent()}
                 </div>
