@@ -3,7 +3,7 @@ import {FiUser} from 'react-icons/fi';
 import {PiSignOut} from 'react-icons/pi';
 import {useState} from 'react';
 
-const Profile = (props: {name: String}) => {
+const UserBox = (props: {name: String}) => {
     const [isOpen, setIsOpen] = useState(false);
 
     return (
@@ -29,4 +29,4 @@ const Profile = (props: {name: String}) => {
     );
 };
 
-export default Profile;
+export default UserBox;

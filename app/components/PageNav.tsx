@@ -16,7 +16,7 @@ const PageNav = (props: {
 
     const getPages = () => {
         const pages =
-            Math.floor(props.items / 8) + (props.items % 8 > 0 ? 1 : 0);
+            Math.floor(props.items / 10) + (props.items % 10 > 0 ? 1 : 0);
         return Array.from({length: pages}, (_, index) => index + 1);
     };
     const getRange = (): Array<number> => {
