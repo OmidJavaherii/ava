@@ -1,7 +1,6 @@
 'use client';
 import {useReducer, useState} from 'react';
 import {SourceType, Tab} from './models/Enums';
-import {AudioReducerAction, AudioReducerState} from './models/Interfaces';
 import localFont from 'next/font/local';
 import LanguageSelect from './components/LanguageSelect';
 import Transcribe from './components/Transcription/Transcribe';
@@ -11,40 +10,25 @@ import {BsMic, BsLink45Deg} from 'react-icons/bs';
 import {FiUploadCloud} from 'react-icons/fi';
 import AudioLink from './components/Tabs/AudioLink';
 
-const yekanFontLight = localFont({src: './font/iranYekanLight.ttf'});
-
-const audioReducer = (state: AudioReducerState, action: AudioReducerAction) => {
-	const {type, payload} = action;
-	switch (type) {
-		case Tab.TAB_RECORD:
-			return {...state, record: {url: payload.url, file: payload.file}};
-		case Tab.TAB_UPLOAD:
-			return {...state, upload: {url: payload.url, file: payload.file}};
-		case Tab.TAB_LINK:
-			return {...state, link: payload.url};
-		default:
-			throw new Error();
-	}
-};
+const yekanFontLight = localFont({src: '../public/fonts/iranYekanLight.ttf'});
 
 export default function Home() {
 	const [activeTab, setActiveTab] = useState<Number>(Tab.TAB_RECORD);
 	const [activeTranscribe, setActiveTranscribe] = useState<Tab>(Tab.NONE);
-	const [audioState, audioDispatch] = useReducer(audioReducer, {
-		record: {url: '', file: undefined},
-		upload: {url: '', file: undefined},
-		link: '',
-	});
+
+	const [audioURL, setAudioURL] = useState<string>();
+	const [audioFile, setAudioFile] = useState<File>();
 
 	const handleRestart = () => {
 		setActiveTranscribe(Tab.NONE);
 	};
 
-	const onAudioSubmit = (url: string, tab: Tab, file?: File) => {
-		audioDispatch({
-			type: tab,
-			payload: {url, ...(tab !== Tab.TAB_LINK && {file})},
-		});
+	const onAudioSubmit = (tab: Tab, audio: string | File) => {
+		if (typeof audio === 'string') {
+			if (tab === Tab.TAB_LINK) setAudioURL(audio);
+		} else {
+			setAudioFile(audio);
+		}
 		setActiveTranscribe(tab);
 	};
 
@@ -53,31 +37,33 @@ export default function Home() {
 			case Tab.TAB_RECORD:
 				if (activeTranscribe === Tab.TAB_RECORD)
 					return (
-						<Transcribe compact={false} color="green" onRestart={handleRestart} source={SourceType.LIVE} />
+						<Transcribe
+							compact={false}
+							color="green"
+							onRestart={handleRestart}
+							data={{type: SourceType.LIVE}}
+						/>
 					);
 				return <AudioRecord onSubmit={onAudioSubmit} />;
 			case Tab.TAB_UPLOAD:
-				if (activeTranscribe === Tab.TAB_UPLOAD)
+				if (activeTranscribe === Tab.TAB_UPLOAD && audioFile)
 					return (
 						<Transcribe
 							compact={false}
 							color="blue"
 							onRestart={handleRestart}
-							audioURL={audioState.upload.url}
-							audioFile={audioState.upload.file}
-							source={SourceType.FILE}
+							data={{type: SourceType.FILE, file: audioFile}}
 						/>
 					);
 				return <AudioUpload onSubmit={onAudioSubmit} />;
 			case Tab.TAB_LINK:
-				if (activeTranscribe === Tab.TAB_LINK)
+				if (activeTranscribe === Tab.TAB_LINK && audioURL)
 					return (
 						<Transcribe
 							compact={false}
 							color="red"
 							onRestart={handleRestart}
-							audioURL={audioState.link}
-							source={SourceType.LINK}
+							data={{type: SourceType.LINK, url: audioURL}}
 						/>
 					);
 				return <AudioLink onSubmit={onAudioSubmit} />;

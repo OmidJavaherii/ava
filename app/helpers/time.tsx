@@ -9,12 +9,14 @@ export const convertSecondsToTime = (val: number) => {
 	return `${minutes}:${seconds.toString().padStart(2, '0')}`;
 };
 
-export const getAudioDuration = (
-	remaining: boolean,
-	duration: number,
-	position: number,
-) => {
+export const getAudioDuration = (remaining: boolean, duration: number, position: number) => {
 	const minutes = Math.floor((duration - (remaining ? position : 0)) / 60);
 	const seconds = Math.round((duration - (remaining ? position : 0)) % 60);
 	return `${minutes}:${seconds.toString().padStart(2, '0')}`;
+};
+
+export const formatDuration = (duration: string): string => {
+	const [hours, minutes, seconds] = duration.split(':');
+	if (hours === '00') return `${minutes}:${seconds}`;
+	return duration;
 };

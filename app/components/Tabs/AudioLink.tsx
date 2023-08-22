@@ -5,8 +5,9 @@ import {ChangeEvent, KeyboardEvent, useState} from 'react';
 import {ToastContainer, toast} from 'react-toastify';
 import {AudioSubmit} from '../../models/Interfaces';
 import {Tab} from '../../models/Enums';
+import {validateLink} from '@/app/helpers/general';
 
-const yekanFontLight = localFont({src: '../../font/iranYekanLight.ttf'});
+const yekanFontLight = localFont({src: '../../../public/fonts/iranYekanLight.ttf'});
 
 const AudioLink = (props: AudioSubmit) => {
 	const [audioURL, setAudioURL] = useState<string>('');
@@ -19,7 +20,7 @@ const AudioLink = (props: AudioSubmit) => {
 	const onInputKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
 		if (e.key === 'Enter') {
 			if (validateLink(audioURL)) {
-				props.onSubmit(audioURL, Tab.TAB_LINK);
+				props.onSubmit(Tab.TAB_LINK, audioURL);
 			} else {
 				setIsLinkValid(false);
 				toast.error('لینک را به صورت صحیح وارد کنید');
@@ -71,27 +72,12 @@ const AudioLink = (props: AudioSubmit) => {
 					onKeyDown={onInputKeyDown}
 				></input>
 			</motion.div>
-			<div
-				className={`${yekanFontLight.className} mt-4 flex flex-col items-center`}
-			>
-				<span>
-					نشانی اینترنتی فایل حاوی گفتار (صوتی/تصویری) را وارد
-				</span>
+			<div className={`${yekanFontLight.className} mt-4 flex flex-col items-center`}>
+				<span>نشانی اینترنتی فایل حاوی گفتار (صوتی/تصویری) را وارد</span>
 				<span>و دکمه را فشار دهید</span>
 			</div>
 		</motion.div>
 	);
-};
-
-const validateLink = (url: string): boolean => {
-	try {
-		new URL(url);
-	} catch (_) {
-		return false;
-	}
-
-	const audioFileFormatRegex = /\.(mp3|wav|ogg|flac|m4a)$/i;
-	return audioFileFormatRegex.test(url);
 };
 
 export default AudioLink;
