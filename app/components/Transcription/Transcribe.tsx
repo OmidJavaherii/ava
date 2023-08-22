@@ -41,14 +41,15 @@ const Transcribe = (props: {
 		| {type: SourceType.LIVE};
 	onRestart?: Function;
 }) => {
+	const {color, compact, data, onRestart} = props;
 	const [activeTab, setActiveTab] = useState<Tab>(0);
 
-	const [isAudioLoaded, setIsAudioLoaded] = useState<boolean>(props.data.type === SourceType.LIVE ? true : false);
+	const [isAudioLoaded, setIsAudioLoaded] = useState<boolean>(data.type === SourceType.LIVE ? true : false);
 	const [audioPosition, setAudioPosition] = useState<number>(0);
 
 	const [isMute, setIsMute] = useState<boolean>(false);
 
-	const [segments, isReady, error, setMute] = useTranscribe(props.data);
+	const [segments, isReady, error, setMute] = useTranscribe(data);
 
 	const segmentItems = useRef(new Array());
 	const segmentDiv = useRef<HTMLDivElement>(null);
@@ -73,14 +74,13 @@ const Transcribe = (props: {
 	//since there is no actual audio, the workaround that has been implemented instead is =>
 	//using the data received from server to update the "audioPosition" so that it scrolls to =>
 	//corresponding segmentg on the second tab
-	if (props.data.type === SourceType.LIVE) {
-		useEffect(() => {
-			if (segments.length > 0) setAudioPosition(segments[segments.length - 1].start);
-		}, [segments]);
-	}
+	useEffect(() => {
+		if (data.type !== SourceType.LIVE) return;
+		if (segments.length > 0) setAudioPosition(segments[segments.length - 1].start);
+	}, [segments]);
 
 	const handleRestart = () => {
-		if (props.onRestart) props.onRestart();
+		if (onRestart) onRestart();
 	};
 
 	const handlePositionChange = (position: number) => {
@@ -97,7 +97,7 @@ const Transcribe = (props: {
 				<span className="text-2xl text-ava-grey">در ارتباط با سرور مشکلی پیش آمد</span>
 				<button
 					className={`${
-						'bg-ava-' + props.color
+						'bg-ava-' + color
 					} flex flex-row-reverse items-center gap-2 rounded-2xl px-3 py-2 text-white hover:brightness-105`}
 					onClick={handleRestart}
 				>
@@ -112,7 +112,7 @@ const Transcribe = (props: {
 			<div className={`${isAudioLoaded && isReady ? 'hidden' : 'block'}`}>
 				<CircularProgress
 					sx={{
-						color: getHexColorByName(props.color),
+						color: getHexColorByName(color),
 					}}
 					size={64}
 				/>
@@ -161,10 +161,10 @@ const Transcribe = (props: {
 							)}
 						</span>
 					</div>
-					{!props.compact && (
+					{!compact && (
 						<div className="mr-auto flex flex-row-reverse items-center gap-6">
 							<span className={`flex flex-row-reverse items-center justify-center gap-6 text-lg`}>
-								{props.data.type === SourceType.LIVE && !isMute && (
+								{data.type === SourceType.LIVE && !isMute && (
 									<div className="relative">
 										<div className="absolute -top-[6px] h-3 w-3 rounded-full bg-ava-red" />
 										<div className="absolute -top-[6px] h-3 w-3 animate-ping rounded-full bg-ava-red" />
@@ -172,15 +172,13 @@ const Transcribe = (props: {
 								)}
 								<LightTooltip title="دانلود صدا">
 									<div>
-										<BsDownload
-											className={`hover:text-ava-${props.color} cursor-pointer text-lg`}
-										/>
+										<BsDownload className={`hover:text-ava-${color} cursor-pointer text-lg`} />
 									</div>
 								</LightTooltip>
 								<LightTooltip title="کپی متن">
 									<div>
 										<GoCopy
-											className={`hover:text-ava-${props.color} cursor-pointer text-lg`}
+											className={`hover:text-ava-${color} cursor-pointer text-lg`}
 											onClick={() =>
 												copyToClipBoard(
 													segments.reduce(
@@ -197,7 +195,7 @@ const Transcribe = (props: {
 							</span>
 							<button
 								className={`${
-									'bg-ava-' + props.color
+									'bg-ava-' + color
 								} flex flex-row-reverse items-center gap-2 rounded-2xl px-3 py-2 text-white hover:brightness-105`}
 								onClick={handleRestart}
 							>
@@ -220,9 +218,7 @@ const Transcribe = (props: {
 							<div
 								key={k}
 								className={`${k % 2 == 0 ? 'bg-[#F2F2F2]' : 'bg-white'} ${
-									audioPosition >= text.start &&
-									audioPosition <= text.end &&
-									`text-ava-${props.color}`
+									audioPosition >= text.start && audioPosition <= text.end && `text-ava-${color}`
 								} flex w-full flex-row gap-3 rounded-xl px-8 py-4`}
 								ref={element => (segmentItems.current[k] = element)}
 							>
@@ -235,7 +231,7 @@ const Transcribe = (props: {
 						))}
 					</div>
 				)}
-				{props.data.type === SourceType.LIVE ? (
+				{data.type === SourceType.LIVE ? (
 					<div
 						className="flex cursor-pointer items-center justify-center rounded-full bg-ava-green p-4 text-2xl text-white"
 						onClick={() => setIsMute(prev => !prev)}
@@ -245,11 +241,11 @@ const Transcribe = (props: {
 				) : (
 					<AudioPlayer
 						audioURL={
-							props.data.type === SourceType.LINK || props.data.type === SourceType.ID
-								? props.data.url
-								: URL.createObjectURL(props.data.file)
+							data.type === SourceType.LINK || data.type === SourceType.ID
+								? data.url
+								: URL.createObjectURL(data.file)
 						}
-						color={props.color}
+						color={color}
 						position={audioPosition}
 						onAudioLoaded={onAudioLoaded}
 						onPositionChange={handlePositionChange}

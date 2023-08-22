@@ -38,13 +38,13 @@ const Archive = () => {
 						file_type: getExtentionByUrl(row.request_data.media_urls),
 					};
 				});
-				if (initialLoading) setInitialLoading(false);
+				setInitialLoading(false);
 				setIsLoading(false);
 				setData({...res.data, results: updatedResults});
 			})
 			.catch(error => {
 				console.error(error);
-				if (initialLoading) setInitialLoading(false);
+				setInitialLoading(false);
 				setError(true);
 			});
 	}, [page]);
