@@ -49,69 +49,66 @@ const useTranscribe = (
 		}
 	};
 
-	if (props.type === SourceType.LIVE) {
-		useEffect(() => {
-			navigator.mediaDevices.getUserMedia({audio: true}).then(stream => {
-				mediaRecorder.current = new MediaRecorder(stream, {mimeType: 'audio/webm;codecs=opus'});
-				mediaRecorder.current.start(1000);
-				mediaRecorder.current.addEventListener('dataavailable', onMicDataAvailable);
-			});
-			ws.current = new WebSocket('wss://harf.roshan-ai.ir/ws_api/transcribe_files/');
-			ws.current.addEventListener('open', onSocketOpen);
-			ws.current.addEventListener('message', onSocketMessage);
+	useEffect(() => {
+		if (props.type !== SourceType.LIVE) return;
+		navigator.mediaDevices.getUserMedia({audio: true}).then(stream => {
+			mediaRecorder.current = new MediaRecorder(stream, {mimeType: 'audio/webm;codecs=opus'});
+			mediaRecorder.current.start(1000);
+			mediaRecorder.current.addEventListener('dataavailable', onMicDataAvailable);
+		});
+		ws.current = new WebSocket('wss://harf.roshan-ai.ir/ws_api/transcribe_files/');
+		ws.current.addEventListener('open', onSocketOpen);
+		ws.current.addEventListener('message', onSocketMessage);
 
-			return () => {
-				if (mediaRecorder.current && ws.current) {
-					mediaRecorder.current.stream.getTracks().forEach(track => track.stop());
-					mediaRecorder.current.stop();
-					mediaRecorder.current.removeEventListener('dataavailable', onMicDataAvailable);
-					ws.current.removeEventListener('open', onSocketOpen);
-					ws.current.removeEventListener('message', onSocketMessage);
-					ws.current.close();
-				}
-			};
-		}, []);
-	} else {
-		useEffect(() => {
-			const urlBase = 'https://harf.roshan-ai.ir/api';
-			const headers = {Authorization: `Token ${process.env.NEXT_PUBLIC_API_TOKEN}`};
-
-			const processResponse = (segments: TranscriptionSegment[]) => {
-				const timedTexts = segments.map(segment => {
-					return {
-						...segment,
-						start: convertDurationToSeconds(segment.start),
-						end: convertDurationToSeconds(segment.end),
-					};
-				});
-				setSegments(timedTexts);
-				setIsReady(true);
-			};
-
-			if (props.type === SourceType.ID) {
-				const url = `${urlBase}/get_request/${props.id}`;
-				axios
-					.get(url, {headers})
-					.then((res: AxiosResponse<TranscriptionRequest>) =>
-						processResponse(res.data.response_data[0].segments),
-					)
-					.catch(() => setError(true));
-			} else {
-				const url = `${urlBase}/transcribe_files/`;
-				const form = new FormData();
-				form.append('language', 'fa');
-				if (props.type === SourceType.LINK) {
-					form.append('media_urls', props.url);
-				} else if (props.type === SourceType.FILE) {
-					form.append('media', props.file);
-				}
-				axios
-					.post(url, form, {headers})
-					.then((res: AxiosResponse<Transcription[]>) => processResponse(res.data[0].segments))
-					.catch(() => setError(true));
+		return () => {
+			if (mediaRecorder.current && ws.current) {
+				mediaRecorder.current.stream.getTracks().forEach(track => track.stop());
+				mediaRecorder.current.stop();
+				mediaRecorder.current.removeEventListener('dataavailable', onMicDataAvailable);
+				ws.current.removeEventListener('open', onSocketOpen);
+				ws.current.removeEventListener('message', onSocketMessage);
+				ws.current.close();
 			}
-		}, []);
-	}
+		};
+	}, []);
+	useEffect(() => {
+		if (props.type === SourceType.LIVE) return;
+		const urlBase = 'https://harf.roshan-ai.ir/api';
+		const headers = {Authorization: `Token ${process.env.NEXT_PUBLIC_API_TOKEN}`};
+
+		const processResponse = (segments: TranscriptionSegment[]) => {
+			const timedTexts = segments.map(segment => {
+				return {
+					...segment,
+					start: convertDurationToSeconds(segment.start),
+					end: convertDurationToSeconds(segment.end),
+				};
+			});
+			setSegments(timedTexts);
+			setIsReady(true);
+		};
+
+		if (props.type === SourceType.ID) {
+			const url = `${urlBase}/get_request/${props.id}`;
+			axios
+				.get(url, {headers})
+				.then((res: AxiosResponse<TranscriptionRequest>) => processResponse(res.data.response_data[0].segments))
+				.catch(() => setError(true));
+		} else {
+			const url = `${urlBase}/transcribe_files/`;
+			const form = new FormData();
+			form.append('language', 'fa');
+			if (props.type === SourceType.LINK) {
+				form.append('media_urls', props.url);
+			} else if (props.type === SourceType.FILE) {
+				form.append('media', props.file);
+			}
+			axios
+				.post(url, form, {headers})
+				.then((res: AxiosResponse<Transcription[]>) => processResponse(res.data[0].segments))
+				.catch(() => setError(true));
+		}
+	}, []);
 	return [segments, isReady, error, setMute];
 };
 
