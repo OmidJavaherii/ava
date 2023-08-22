@@ -23,6 +23,9 @@ const AudioPlayer = (props: {
 	useEffect(() => {
 		const audio = audioRef.current;
 		const onLoadedMetadata = () => {
+			//this function is used to get the audio file's duration
+			//there is a bug with chrome browser that might return 'infinity' as the duration
+			//to bypass that issue there is a workaround that has been implemented here
 			if (audio.duration === Infinity) {
 				audio.currentTime = 1e101;
 				audio.ontimeupdate = function () {
@@ -86,13 +89,9 @@ const AudioPlayer = (props: {
 					}}
 				/>
 				{isPlaying ? (
-					<AiOutlinePause
-						onClick={() => setIsPlaying(prev => !prev)}
-					/>
+					<AiOutlinePause onClick={() => setIsPlaying(prev => !prev)} />
 				) : (
-					<TbPlayerPlayFilled
-						onClick={() => setIsPlaying(prev => !prev)}
-					/>
+					<TbPlayerPlayFilled onClick={() => setIsPlaying(prev => !prev)} />
 				)}
 			</div>
 			<Slider
@@ -120,18 +119,12 @@ const AudioPlayer = (props: {
 				value={props.position}
 				onChange={handlePosition}
 			/>
-			<div className="w-12">
-				{getAudioDuration(true, audioDuration, props.position)}
-			</div>
+			<div className="w-12">{getAudioDuration(true, audioDuration, props.position)}</div>
 			<div className="flex w-40 flex-row items-center justify-center gap-2 text-2xl">
 				{isMute ? (
-					<BiSolidVolumeMute
-						onClick={() => setIsMute(prev => !prev)}
-					/>
+					<BiSolidVolumeMute onClick={() => setIsMute(prev => !prev)} />
 				) : (
-					<BiSolidVolumeFull
-						onClick={() => setIsMute(prev => !prev)}
-					/>
+					<BiSolidVolumeFull onClick={() => setIsMute(prev => !prev)} />
 				)}
 				<Slider
 					sx={{

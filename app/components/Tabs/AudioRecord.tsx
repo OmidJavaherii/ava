@@ -4,7 +4,7 @@ import {AudioSubmit} from '@/app/models/Interfaces';
 import {motion} from 'framer-motion';
 import {BsMic} from 'react-icons/bs';
 
-const yekanFontLight = localFont({src: '../../font/iranYekanLight.ttf'});
+const yekanFontLight = localFont({src: '../../../public/fonts/iranYekanLight.ttf'});
 
 const AudioRecord = (props: AudioSubmit) => {
 	return (
@@ -17,7 +17,7 @@ const AudioRecord = (props: AudioSubmit) => {
 			<div className="relative flex flex-row items-center">
 				<div
 					className="z-10 flex h-16 w-16 cursor-pointer items-center justify-center rounded-full bg-ava-green text-3xl text-white"
-					onClick={() => props.onSubmit('', Tab.TAB_RECORD)}
+					onClick={() => props.onSubmit(Tab.TAB_RECORD, '')}
 				>
 					<BsMic />
 				</div>

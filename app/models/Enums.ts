@@ -3,6 +3,7 @@ import { File } from "buffer";
 export enum SourceType {
     LINK,
     FILE,
+    ID,
     LIVE
 }
 

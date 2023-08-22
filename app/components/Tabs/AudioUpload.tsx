@@ -5,7 +5,7 @@ import {ChangeEvent, DragEvent, useRef, useState} from 'react';
 import {AudioSubmit} from '../../models/Interfaces';
 import {Tab} from '../../models/Enums';
 
-const yekanFontLight = localFont({src: '../../font/iranYekanLight.ttf'});
+const yekanFontLight = localFont({src: '../../../public/fonts/iranYekanLight.ttf'});
 
 const AudioUpload = (props: AudioSubmit) => {
 	const fileInputRef = useRef<HTMLInputElement>(null);
@@ -21,7 +21,7 @@ const AudioUpload = (props: AudioSubmit) => {
 		const selectedFile = event.target.files?.[0];
 		if (selectedFile) {
 			const audioURL = URL.createObjectURL(selectedFile);
-			props.onSubmit(audioURL, Tab.TAB_UPLOAD, selectedFile);
+			props.onSubmit(Tab.TAB_UPLOAD, selectedFile);
 		}
 	};
 
@@ -39,7 +39,7 @@ const AudioUpload = (props: AudioSubmit) => {
 		const droppedFile = event.dataTransfer.files?.[0];
 		if (droppedFile) {
 			const audioURL = URL.createObjectURL(droppedFile);
-			props.onSubmit(audioURL, Tab.TAB_UPLOAD, droppedFile);
+			props.onSubmit(Tab.TAB_UPLOAD, droppedFile);
 		}
 		setIsDragging(false);
 	};
@@ -63,16 +63,11 @@ const AudioUpload = (props: AudioSubmit) => {
 			>
 				<FiUploadCloud />
 			</span>
-			<div
-				className={`${yekanFontLight.className} mt-4 flex flex-col items-center`}
-			>
+			<div className={`${yekanFontLight.className} mt-4 flex flex-col items-center`}>
 				{isDragging ? (
 					<span>فایل خود را اینجا رها کنید</span>
 				) : (
-					<span>
-						برای بارگذاری فایل گفتاری (صوتی/تصویری)، دکمه را فشار
-						دهید
-					</span>
+					<span>برای بارگذاری فایل گفتاری (صوتی/تصویری)، دکمه را فشار دهید</span>
 				)}
 				<span>متن پیاده شده آن، در اینجا ظاهر می شود</span>
 			</div>

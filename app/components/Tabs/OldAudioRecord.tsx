@@ -1,3 +1,6 @@
+// this is the old Audio Recorder that would record user's input completely then convert it into a file to be transcribed
+// this file is no longer in use since the record tab now transcribes user's input at real time via websocket
+
 import {useEffect, useRef, useState} from 'react';
 import localFont from 'next/font/local';
 import {motion} from 'framer-motion';
@@ -8,7 +11,7 @@ import {AudioSubmit} from '../../models/Interfaces';
 import {Tab} from '../../models/Enums';
 import {mapRange} from '@/app/helpers/general';
 
-const yekanFontLight = localFont({src: '../../font/iranYekanLight.ttf'});
+const yekanFontLight = localFont({src: '../../../fonts/iranYekanLight.ttf'});
 
 const AudioRecord = (props: AudioSubmit) => {
 	const mediaRecorder = useRef<MediaRecorder>();
@@ -20,7 +23,7 @@ const AudioRecord = (props: AudioSubmit) => {
 	useEffect(() => {
 		if (submit) {
 			setSubmit(false);
-			if (audio?.url && audio?.file) props.onSubmit(audio.url, Tab.TAB_RECORD, audio.file);
+			// if (audio?.url && audio?.file) props.onSubmit(audio.url, Tab.TAB_RECORD, audio.file);
 		}
 	}, [audio]);
 

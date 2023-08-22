@@ -3,12 +3,10 @@ import localFont from 'next/font/local';
 import AudioPlayer from './AudioPlayer';
 
 import {getHexColorByName} from '@/app/helpers/general';
-import {convertDurationToSeconds, convertSecondsToTime} from '@/app/helpers/time';
+import {convertSecondsToTime} from '@/app/helpers/time';
 
-import {TimedText, Transcription, TranscriptionRequest, TranscriptionSegment} from '../../models/Interfaces';
 import {SourceType, Tab} from '../../models/Enums';
 
-import axios, {AxiosResponse} from 'axios';
 import {CircularProgress, Tooltip, TooltipProps, Zoom, styled, tooltipClasses} from '@mui/material';
 import {ToastContainer, toast} from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -17,9 +15,10 @@ import {GoCopy} from 'react-icons/go';
 import {BsTextRight, BsClock, BsDownload} from 'react-icons/bs';
 import {TfiReload} from 'react-icons/tfi';
 import {BsMic, BsMicMute} from 'react-icons/bs';
+import useTranscribe from '@/app/hooks/useTranscribe';
 
-const yekanFontLight = localFont({src: '../../font/iranYekanLight.ttf'});
-const iranSansFont = localFont({src: '../../font/iranSans.ttf'});
+const yekanFontLight = localFont({src: '../../../public/fonts/iranYekanLight.ttf'});
+const iranSansFont = localFont({src: '../../../public/fonts/iranSans.ttf'});
 
 const LightTooltip = styled(({className, ...props}: TooltipProps) => (
 	<Tooltip {...props} classes={{popper: className}} TransitionComponent={Zoom} placement="top" />
@@ -33,114 +32,52 @@ const LightTooltip = styled(({className, ...props}: TooltipProps) => (
 }));
 
 const Transcribe = (props: {
-	Id?: number;
-	audioURL?: string;
-	source: SourceType;
-	onRestart?: Function;
-	audioFile?: File;
 	color: string;
 	compact: boolean;
+	data:
+		| {type: SourceType.ID; id: number; url: string}
+		| {type: SourceType.LINK; url: string}
+		| {type: SourceType.FILE; file: File}
+		| {type: SourceType.LIVE};
+	onRestart?: Function;
 }) => {
 	const [activeTab, setActiveTab] = useState<Tab>(0);
-	const [isDataLoaded, setIsDataLoaded] = useState<boolean>(false);
 
-	const [error, setError] = useState<boolean>(false);
-
-	const [isAudioLoaded, setIsAudioLoaded] = useState<boolean>(false);
+	const [isAudioLoaded, setIsAudioLoaded] = useState<boolean>(props.data.type === SourceType.LIVE ? true : false);
 	const [audioPosition, setAudioPosition] = useState<number>(0);
 
-	const [timedTexts, setTimedTexts] = useState<Array<TimedText>>([]);
+	const [isMute, setIsMute] = useState<boolean>(false);
 
-	const timedItems = useRef(new Array());
-	const timedDiv = useRef<HTMLDivElement>(null);
+	const [segments, isReady, error, setMute] = useTranscribe(props.data);
 
-	const [isRecording, setIsRecording] = useState<boolean>(false);
-	const mediaRecorder = useRef<MediaRecorder>();
-	const ws = useRef<WebSocket>();
+	const segmentItems = useRef(new Array());
+	const segmentDiv = useRef<HTMLDivElement>(null);
 
-	if (props.source === SourceType.LIVE) {
-		useEffect(() => {
-			navigator.mediaDevices.getUserMedia({audio: true}).then(stream => {
-				mediaRecorder.current = new MediaRecorder(stream, {mimeType: 'audio/webm;codecs=opus'});
-				mediaRecorder.current.start(1000);
-				mediaRecorder.current.addEventListener('dataavailable', handleDataAvailable);
-			});
-			ws.current = new WebSocket('wss://harf.roshan-ai.ir/ws_api/transcribe_files/');
-			ws.current.addEventListener('message', handleLiveTranscription);
-			ws.current.addEventListener('open', handleOpenConnection);
-
-			return () => {
-				if (mediaRecorder.current && ws.current) {
-					mediaRecorder.current.stream.getTracks().forEach(track => track.stop());
-					mediaRecorder.current.stop();
-					mediaRecorder.current.removeEventListener('dataavailable', handleDataAvailable);
-					ws.current.removeEventListener('message', handleLiveTranscription);
-					ws.current.removeEventListener('open', handleOpenConnection);
-					ws.current.close();
-				}
-			};
-		}, []);
-
-		useEffect(() => {
-			if (mediaRecorder.current) {
-				if (isRecording) mediaRecorder.current.resume();
-				if (!isRecording) mediaRecorder.current.pause();
-			}
-		}, [isRecording]);
-	} else {
-		useEffect(() => {
-			const urlBase = 'https://harf.roshan-ai.ir/api';
-			const headers = {Authorization: `Token ${process.env.NEXT_PUBLIC_API_TOKEN}`};
-
-			const processResponse = (segments: TranscriptionSegment[]) => {
-				const timedTexts = segments.map(segment => {
-					return {
-						...segment,
-						start: convertDurationToSeconds(segment.start),
-						end: convertDurationToSeconds(segment.end),
-					};
-				});
-				setTimedTexts(timedTexts);
-				setIsDataLoaded(true);
-			};
-
-			if (props.Id) {
-				const url = `${urlBase}/get_request/${props.Id}`;
-				axios
-					.get(url, {headers})
-					.then((res: AxiosResponse<TranscriptionRequest>) =>
-						processResponse(res.data.response_data[0].segments),
-					)
-					.catch(() => setError(true));
-			} else {
-				const url = `${urlBase}/transcribe_files/`;
-				const form = new FormData();
-				form.append('language', 'fa');
-				if (props.source === SourceType.LINK && props.audioURL) {
-					form.append('media_urls', props.audioURL);
-				} else if (props.audioFile) {
-					form.append('media', props.audioFile);
-				}
-				axios
-					.post(url, form, {headers})
-					.then((res: AxiosResponse<Transcription[]>) => processResponse(res.data[0].segments))
-					.catch(() => setError(true));
-			}
-		}, []);
-	}
-
+	//this hook will scroll to the segment that is currently playing on the second tab (متن زمان بندی شده)
 	useEffect(() => {
-		const itemIndex = timedTexts.findIndex(item => audioPosition >= item.start && audioPosition <= item.end);
-		if (activeTab === 0) return;
-		if (!timedDiv.current) return;
+		const itemIndex = segments.findIndex(item => audioPosition >= item.start && audioPosition <= item.end);
+		if (activeTab === 0) return; //no scroll/calculation needed if the user is not on the second tab
+		if (!segmentDiv.current) return;
 		if (itemIndex < 0) return;
 
-		const offset = timedItems.current[itemIndex].offsetTop - timedDiv.current.offsetTop;
-		timedDiv.current.scrollTo({
+		const offset = segmentItems.current[itemIndex].offsetTop - segmentDiv.current.offsetTop;
+		segmentDiv.current.scrollTo({
 			behavior: 'smooth',
 			top: offset,
 		});
 	}, [audioPosition]);
+
+	useEffect(() => setMute(isMute), [isMute]);
+
+	//this function is updating current audio position while user is using live transcribtion
+	//since there is no actual audio, the workaround that has been implemented instead is =>
+	//using the data received from server to update the "audioPosition" so that it scrolls to =>
+	//corresponding segmentg on the second tab
+	if (props.data.type === SourceType.LIVE) {
+		useEffect(() => {
+			if (segments.length > 0) setAudioPosition(segments[segments.length - 1].start);
+		}, [segments]);
+	}
 
 	const handleRestart = () => {
 		if (props.onRestart) props.onRestart();
@@ -148,33 +85,6 @@ const Transcribe = (props: {
 
 	const handlePositionChange = (position: number) => {
 		setAudioPosition(position);
-	};
-
-	const handleDataAvailable = (e: BlobEvent) => {
-		if (e.data.size > 0) {
-			if (ws.current?.readyState === 1) {
-				ws.current.send(e.data);
-			} else if (ws.current?.readyState !== 0) {
-				setError(true);
-			}
-		}
-	};
-
-	const handleLiveTranscription = (e: MessageEvent<any>) => {
-		const {segment_id, text, start, end} = JSON.parse(e.data);
-		const data = {text: text, start: convertDurationToSeconds(start), end: convertDurationToSeconds(end)};
-		setTimedTexts(prev => {
-			const prevData = [...prev];
-			prevData[segment_id] = data;
-			return prevData;
-		});
-		setAudioPosition(data.end);
-	};
-
-	const handleOpenConnection = () => {
-		setIsDataLoaded(true);
-		setIsAudioLoaded(true);
-		setIsRecording(true);
 	};
 
 	const onAudioLoaded = (state: boolean) => {
@@ -199,7 +109,7 @@ const Transcribe = (props: {
 
 	return (
 		<div className="flex h-full w-full items-center justify-center">
-			<div className={`${isAudioLoaded && isDataLoaded ? 'hidden' : 'block'}`}>
+			<div className={`${isAudioLoaded && isReady ? 'hidden' : 'block'}`}>
 				<CircularProgress
 					sx={{
 						color: getHexColorByName(props.color),
@@ -209,7 +119,7 @@ const Transcribe = (props: {
 			</div>
 			<div
 				className={`${yekanFontLight.className} ${
-					isAudioLoaded && isDataLoaded ? 'block' : 'hidden'
+					isAudioLoaded && isReady ? 'block' : 'hidden'
 				} flex h-full w-full flex-col items-center gap-2 px-6 py-4`}
 			>
 				<ToastContainer
@@ -254,7 +164,7 @@ const Transcribe = (props: {
 					{!props.compact && (
 						<div className="mr-auto flex flex-row-reverse items-center gap-6">
 							<span className={`flex flex-row-reverse items-center justify-center gap-6 text-lg`}>
-								{isRecording && (
+								{props.data.type === SourceType.LIVE && !isMute && (
 									<div className="relative">
 										<div className="absolute -top-[6px] h-3 w-3 rounded-full bg-ava-red" />
 										<div className="absolute -top-[6px] h-3 w-3 animate-ping rounded-full bg-ava-red" />
@@ -273,7 +183,7 @@ const Transcribe = (props: {
 											className={`hover:text-ava-${props.color} cursor-pointer text-lg`}
 											onClick={() =>
 												copyToClipBoard(
-													timedTexts.reduce(
+													segments.reduce(
 														(accumulator, currentVal) =>
 															accumulator + ' ' + currentVal.text,
 														'',
@@ -301,12 +211,12 @@ const Transcribe = (props: {
 				{activeTab === 0 ? (
 					<div className="rtl mt-2 flex h-full w-full flex-col gap-3 overflow-y-auto text-right">
 						<div className="pl-4 text-right leading-7">
-							{timedTexts.reduce((accumulator, currentVal) => accumulator + ' ' + currentVal.text, '')}
+							{segments.reduce((accumulator, currentVal) => accumulator + ' ' + currentVal.text, '')}
 						</div>
 					</div>
 				) : (
-					<div className="rtl mt-2 flex w-full flex-col overflow-y-auto pl-2" ref={timedDiv}>
-						{timedTexts.map((text, k) => (
+					<div className="rtl mt-2 flex h-full w-full flex-col overflow-y-auto pl-2" ref={segmentDiv}>
+						{segments.map((text, k) => (
 							<div
 								key={k}
 								className={`${k % 2 == 0 ? 'bg-[#F2F2F2]' : 'bg-white'} ${
@@ -314,7 +224,7 @@ const Transcribe = (props: {
 									audioPosition <= text.end &&
 									`text-ava-${props.color}`
 								} flex w-full flex-row gap-3 rounded-xl px-8 py-4`}
-								ref={element => (timedItems.current[k] = element)}
+								ref={element => (segmentItems.current[k] = element)}
 							>
 								<div className={`${iranSansFont.className} w-10`}>{convertSecondsToTime(text.end)}</div>
 								<div className={`${iranSansFont.className} w-10`}>
@@ -325,17 +235,20 @@ const Transcribe = (props: {
 						))}
 					</div>
 				)}
-				{props.source === SourceType.LIVE && (
+				{props.data.type === SourceType.LIVE ? (
 					<div
 						className="flex cursor-pointer items-center justify-center rounded-full bg-ava-green p-4 text-2xl text-white"
-						onClick={() => setIsRecording(prev => !prev)}
+						onClick={() => setIsMute(prev => !prev)}
 					>
-						{isRecording ? <BsMic /> : <BsMicMute />}
+						{isMute ? <BsMicMute /> : <BsMic />}
 					</div>
-				)}
-				{props.audioURL && (
+				) : (
 					<AudioPlayer
-						audioURL={props.audioURL}
+						audioURL={
+							props.data.type === SourceType.LINK || props.data.type === SourceType.ID
+								? props.data.url
+								: URL.createObjectURL(props.data.file)
+						}
 						color={props.color}
 						position={audioPosition}
 						onAudioLoaded={onAudioLoaded}

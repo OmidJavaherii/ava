@@ -53,16 +53,5 @@ export interface TimedText {
 }
 
 export interface AudioSubmit {
-    onSubmit: (audioURL: string, tab: Tab, audioFile?: File) => void
-}
-
-export interface AudioReducerState {
-    record: { url: string | null, file: File | undefined }
-    upload: { url: string, file: File | undefined },
-    link: string,
-}
-
-export interface AudioReducerAction {
-    type: Tab,
-    payload: { url: string, file?: File | undefined }
+    onSubmit: (tab: Tab, audio: string | File) => void
 }

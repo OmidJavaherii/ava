@@ -7,7 +7,7 @@ import Link from 'next/link';
 import localFont from 'next/font/local';
 import UserBox from './components/UserBox';
 
-const yekanFont = localFont({src: './font/iranYekan.ttf'});
+const yekanFont = localFont({src: '../public/fonts/iranYekan.ttf'});
 
 export const metadata: Metadata = {
 	title: 'Create Next App',
