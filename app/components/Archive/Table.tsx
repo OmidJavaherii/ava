@@ -41,10 +41,11 @@ const animateItem = {
 };
 
 const Table = (props: {data: ArchiveList; isLoading: boolean; onDelete: (id: number) => void}) => {
+	const {data, isLoading, onDelete} = props;
 	const [expandedRow, setExpandedRow] = useState<number | undefined>();
 
 	const handleDelete = (id: number) => {
-		props.onDelete(id);
+		onDelete(id);
 		setExpandedRow(prev => (prev === id ? undefined : prev));
 	};
 
@@ -61,7 +62,7 @@ const Table = (props: {data: ArchiveList; isLoading: boolean; onDelete: (id: num
 						<span className="flex-1 text-center">مدت زمان</span>
 						<span className="flex-1 grow-[2]" />
 					</div>
-					{props.isLoading ? (
+					{isLoading ? (
 						<div className="absolute left-1/2 top-[40%] mr-48">
 							<CircularProgress
 								sx={{
@@ -78,7 +79,7 @@ const Table = (props: {data: ArchiveList; isLoading: boolean; onDelete: (id: num
 							animate="show"
 						>
 							<AnimatePresence>
-								{props.data.results.map(row => (
+								{data.results.map(row => (
 									<motion.div
 										className={`${
 											expandedRow === row.id

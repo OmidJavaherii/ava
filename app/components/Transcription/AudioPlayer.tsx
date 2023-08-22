@@ -13,7 +13,9 @@ const AudioPlayer = (props: {
 	onAudioLoaded: (state: boolean) => void;
 	onPositionChange: (position: number) => void;
 }) => {
-	const audioRef = useRef(new Audio(props.audioURL));
+	const {audioURL, color, position, onAudioLoaded, onPositionChange} = props;
+
+	const audioRef = useRef(new Audio(audioURL));
 
 	const [audioDuration, setAudioDuration] = useState<number>(0);
 	const [audioVolume, setAudioVolume] = useState<number>(75);
@@ -38,11 +40,11 @@ const AudioPlayer = (props: {
 			} else {
 				setAudioDuration(audio.duration);
 			}
-			props.onAudioLoaded(true);
+			onAudioLoaded(true);
 		};
 
 		const onTimeUpdate = () => {
-			props.onPositionChange(audio.currentTime);
+			onPositionChange(audio.currentTime);
 			if (audio.currentTime === audio.duration) {
 				setIsPlaying(false);
 			}
@@ -76,7 +78,7 @@ const AudioPlayer = (props: {
 
 	const handlePosition = (e: Event, val: number | number[]) => {
 		const position = Array.isArray(val) ? 0 : val;
-		props.onPositionChange(position);
+		onPositionChange(position);
 		audioRef.current.currentTime = position;
 	};
 	return (
@@ -84,7 +86,7 @@ const AudioPlayer = (props: {
 			<div className="flex flex-row text-xl">
 				<TbPlayerStopFilled
 					onClick={() => {
-						props.onPositionChange(0);
+						onPositionChange(0);
 						setIsPlaying(false);
 					}}
 				/>
@@ -96,7 +98,7 @@ const AudioPlayer = (props: {
 			</div>
 			<Slider
 				sx={{
-					color: getHexColorByName(props.color),
+					color: getHexColorByName(color),
 					height: 3,
 					'& .MuiSlider-thumb': {
 						'::after': {
@@ -116,10 +118,10 @@ const AudioPlayer = (props: {
 				}}
 				min={0}
 				max={audioDuration}
-				value={props.position}
+				value={position}
 				onChange={handlePosition}
 			/>
-			<div className="w-12">{getAudioDuration(true, audioDuration, props.position)}</div>
+			<div className="w-12">{getAudioDuration(true, audioDuration, position)}</div>
 			<div className="flex w-40 flex-row items-center justify-center gap-2 text-2xl">
 				{isMute ? (
 					<BiSolidVolumeMute onClick={() => setIsMute(prev => !prev)} />
@@ -128,7 +130,7 @@ const AudioPlayer = (props: {
 				)}
 				<Slider
 					sx={{
-						color: getHexColorByName(props.color),
+						color: getHexColorByName(color),
 						'& .MuiSlider-thumb ': {
 							display: 'none',
 						},
