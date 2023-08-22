@@ -10,10 +10,10 @@ const useTranscribe = (
 		| {type: SourceType.LINK; url: string}
 		| {type: SourceType.FILE; file: File}
 		| {type: SourceType.LIVE},
-): [Array<TimedText>, boolean, boolean, (mute: boolean) => void] => {
+): [Array<TimedText>, boolean, number, (mute: boolean) => void] => {
 	const [segments, setSegments] = useState<Array<TimedText>>([]);
 	const [isReady, setIsReady] = useState<boolean>(false);
-	const [error, setError] = useState<boolean>(false);
+	const [error, setError] = useState<number>(0);
 
 	const mediaRecorder = useRef<MediaRecorder>();
 	const ws = useRef<WebSocket>();
@@ -23,7 +23,7 @@ const useTranscribe = (
 			if (ws.current?.readyState === 1) {
 				ws.current.send(e.data);
 			} else if (ws.current?.readyState !== 0) {
-				setError(true);
+				setError(1);
 			}
 		}
 	};
@@ -51,11 +51,16 @@ const useTranscribe = (
 
 	useEffect(() => {
 		if (props.type !== SourceType.LIVE) return;
-		navigator.mediaDevices.getUserMedia({audio: true}).then(stream => {
-			mediaRecorder.current = new MediaRecorder(stream, {mimeType: 'audio/webm;codecs=opus'});
-			mediaRecorder.current.start(1000);
-			mediaRecorder.current.addEventListener('dataavailable', onMicDataAvailable);
-		});
+		navigator.mediaDevices
+			.getUserMedia({audio: true})
+			.then(stream => {
+				mediaRecorder.current = new MediaRecorder(stream, {mimeType: 'audio/webm;codecs=opus'});
+				mediaRecorder.current.start(1000);
+				mediaRecorder.current.addEventListener('dataavailable', onMicDataAvailable);
+			})
+			.catch(() => {
+				setError(3);
+			});
 		ws.current = new WebSocket('wss://harf.roshan-ai.ir/ws_api/transcribe_files/');
 		ws.current.addEventListener('open', onSocketOpen);
 		ws.current.addEventListener('message', onSocketMessage);
@@ -93,7 +98,7 @@ const useTranscribe = (
 			axios
 				.get(url, {headers})
 				.then((res: AxiosResponse<TranscriptionRequest>) => processResponse(res.data.response_data[0].segments))
-				.catch(() => setError(true));
+				.catch(() => setError(2));
 		} else {
 			const url = `${urlBase}/transcribe_files/`;
 			const form = new FormData();
@@ -106,7 +111,7 @@ const useTranscribe = (
 			axios
 				.post(url, form, {headers})
 				.then((res: AxiosResponse<Transcription[]>) => processResponse(res.data[0].segments))
-				.catch(() => setError(true));
+				.catch(() => setError(2));
 		}
 	}, []);
 	return [segments, isReady, error, setMute];
