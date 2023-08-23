@@ -91,10 +91,12 @@ const Transcribe = (props: {
 		setIsAudioLoaded(state);
 	};
 
-	if (error)
+	if (error > 0)
 		return (
 			<div className="flex h-full w-full flex-col items-center justify-center gap-6">
-				<span className="text-2xl text-ava-grey">در ارتباط با سرور مشکلی پیش آمد</span>
+				<span className="text-2xl text-ava-grey">
+					{error === 3 ? <>اجازه دسترسی به میکروفون نیاز است</> : <>در ارتباط با سرور مشکلی پیش آمد</>}
+				</span>
 				<button
 					className={`${
 						'bg-ava-' + color
