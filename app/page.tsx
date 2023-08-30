@@ -9,6 +9,8 @@ import AudioUpload from './components/Tabs/AudioUpload';
 import {BsMic, BsLink45Deg} from 'react-icons/bs';
 import {FiUploadCloud} from 'react-icons/fi';
 import AudioLink from './components/Tabs/AudioLink';
+import {useDispatch} from 'react-redux';
+import {disable, enable} from './redux/slices/languageSlice';
 
 const yekanFontLight = localFont({src: '../public/fonts/iranYekanLight.ttf'});
 
@@ -18,6 +20,8 @@ export default function Home() {
 
 	const [audioURL, setAudioURL] = useState<string>();
 	const [audioFile, setAudioFile] = useState<File>();
+
+	const languageDispatch = useDispatch();
 
 	const handleRestart = () => {
 		setActiveTranscribe(Tab.NONE);
@@ -35,7 +39,8 @@ export default function Home() {
 	const getTabContent = () => {
 		switch (activeTab) {
 			case Tab.TAB_RECORD:
-				if (activeTranscribe === Tab.TAB_RECORD)
+				if (activeTranscribe === Tab.TAB_RECORD) {
+					languageDispatch(disable());
 					return (
 						<Transcribe
 							compact={false}
@@ -44,9 +49,12 @@ export default function Home() {
 							data={{type: SourceType.LIVE}}
 						/>
 					);
+				}
+				languageDispatch(enable());
 				return <AudioRecord onSubmit={onAudioSubmit} />;
 			case Tab.TAB_UPLOAD:
-				if (activeTranscribe === Tab.TAB_UPLOAD && audioFile)
+				if (activeTranscribe === Tab.TAB_UPLOAD && audioFile) {
+					languageDispatch(disable());
 					return (
 						<Transcribe
 							compact={false}
@@ -55,9 +63,12 @@ export default function Home() {
 							data={{type: SourceType.FILE, file: audioFile}}
 						/>
 					);
+				}
+				languageDispatch(enable());
 				return <AudioUpload onSubmit={onAudioSubmit} />;
 			case Tab.TAB_LINK:
-				if (activeTranscribe === Tab.TAB_LINK && audioURL)
+				if (activeTranscribe === Tab.TAB_LINK && audioURL) {
+					languageDispatch(disable());
 					return (
 						<Transcribe
 							compact={false}
@@ -66,6 +77,8 @@ export default function Home() {
 							data={{type: SourceType.LINK, url: audioURL}}
 						/>
 					);
+				}
+				languageDispatch(enable());
 				return <AudioLink onSubmit={onAudioSubmit} />;
 			default:
 				return <></>;
