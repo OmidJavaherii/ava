@@ -83,7 +83,11 @@ const Table = (props: {data: ArchiveList; isLoading: boolean; onDelete: (id: num
 									<motion.div
 										className={`${
 											expandedRow === row.id
-												? 'border-solid border-ava-red'
+												? `border-solid border-ava-${
+														row.request_data.media_urls.includes('harf.roshan-ai.ir')
+															? 'blue'
+															: 'red'
+												  }`
 												: 'border-transparent hover:shadow-[1px_2px_5px_0_rgba(0,0,0,0.1)]'
 										} my-2 mr-1 flex flex-col rounded-lg border py-2 pr-4`}
 										exit={{x: 200, opacity: 0}}
@@ -102,33 +106,32 @@ const Table = (props: {data: ArchiveList; isLoading: boolean; onDelete: (id: num
 														: setExpandedRow(row.id)
 												}
 											>
-												{row.request_type === 'Record' && (
-													<div className="flex h-8 w-8 items-center justify-center rounded-full bg-ava-green text-2xl text-white">
-														<BsMic />
-													</div>
-												)}
-												{row.request_type === 'Upload' && (
+												{row.request_data.media_urls.includes('harf.roshan-ai.ir') ? (
 													<div className="flex h-8 w-8 items-center justify-center rounded-full bg-ava-blue text-xl text-white">
 														<FiUploadCloud />
 													</div>
-												)}
-												{row.request_type === 'Url' && (
+												) : (
 													<div className="flex h-8 w-8 items-center justify-center rounded-full bg-ava-red text-xl text-white">
 														<BsLink45Deg />
 													</div>
 												)}
+												{/* since the live transcription from websocket isn't pushed to the database, we won't need this
+													<div className="flex h-8 w-8 items-center justify-center rounded-full bg-ava-green text-2xl text-white">
+														<BsMic />
+													</div>
+												 */}
 											</div>
 											<div className="flex-1 grow-[5] overflow-hidden text-ellipsis whitespace-nowrap pr-8">
-												{row.request_type === 'Url' ? (
-													<a
-														className="font-light text-[#118AD3] hover:underline"
-														href={row.request_data.media_urls}
-													>
-														{row.request_data.media_urls}
-													</a>
-												) : (
-													<>{row.request_data.media_urls}</>
-												)}
+												<div
+													className="font-light text-[#118AD3] hover:cursor-pointer hover:underline"
+													onClick={() =>
+														expandedRow === row.id
+															? setExpandedRow(undefined)
+															: setExpandedRow(row.id)
+													}
+												>
+													{row.request_data.media_urls}
+												</div>
 											</div>
 											<div className={`${iranSansFont.className} flex-1 text-center`}>
 												{row.date}
@@ -140,9 +143,9 @@ const Table = (props: {data: ArchiveList; isLoading: boolean; onDelete: (id: num
 											<div className="flex-1 grow-[2]">
 												<div className="flex flex-row items-center justify-center text-lg text-[#8F8F8F]">
 													<LightTooltip title="دانلود صدا">
-														<div>
+														<a href={row.request_data.media_urls} target="_blank">
 															<BsDownload className="mx-3 cursor-pointer hover:text-ava-green" />
-														</div>
+														</a>
 													</LightTooltip>
 													<LightTooltip title="دانلود فایل">
 														<div>
@@ -191,9 +194,9 @@ const Table = (props: {data: ArchiveList; isLoading: boolean; onDelete: (id: num
 														}}
 														compact={true}
 														color={
-															(row.request_type === 'Url' && 'red') ||
-															(row.request_type === 'Upload' && 'blue') ||
-															'green'
+															row.request_data.media_urls.includes('harf.roshan-ai.ir')
+																? 'blue'
+																: 'red'
 														}
 													/>
 												</motion.div>
@@ -209,5 +212,4 @@ const Table = (props: {data: ArchiveList; isLoading: boolean; onDelete: (id: num
 		</div>
 	);
 };
-
 export default Table;
