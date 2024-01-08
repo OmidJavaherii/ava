@@ -104,7 +104,7 @@ export default function Home() {
 						} flex cursor-pointer flex-row items-center gap-1 rounded-t-lg px-8 py-3 text-ava-grey`}
 						onClick={() => setActiveTab(Tab.TAB_RECORD)}
 					>
-						ظبط صدا
+						ضبط صدا
 						<BsMic className="text-2xl" />
 					</span>
 					<span
